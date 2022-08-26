@@ -1,0 +1,1 @@
+'mongodb+srv://cluster0-un:cluster0-pw@cluster0.ty583cd.mongodb.net/local_library?retryWrites=true&w=majority'
