@@ -217,6 +217,7 @@ exports.author_update_post = [
       family_name: req.body.family_name,
       date_of_birth: req.body.date_of_birth,
       date_of_death: req.body.date_of_death,
+      _id: req.params.id,
     });
     if (!errors.isEmpty()) {
       // There are errors. Render form again with sanitized values/errors messages.
@@ -226,12 +227,11 @@ exports.author_update_post = [
         errors: errors.array(),
       });
       return;
-    } else {
-      Author.findByIdAndUpdate(req.params.id, author, (err, theauthor) => {
-        if (err) return next(err);
-        res.redirect(theauthor.url);
-      });
-    };
+    }
+    Author.findByIdAndUpdate(req.params.id, author, {}, (err, theauthor) => {
+      if (err) return next(err);
+      res.redirect(theauthor.url);
+    });
   },
 ];
 //---------------------------------------------------------------------------------

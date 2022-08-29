@@ -44,8 +44,18 @@ AuthorSchema
   .virtual('date_of_death_formatted')
   .get(function() {
     return this.date_of_death ? 
-      DateTime.fromJSDate(this.date_of_birth).toLocaleString(DateTime.DATE_MED)
+      DateTime.fromJSDate(this.date_of_death).toLocaleString(DateTime.DATE_MED)
       : '';
+  });
+AuthorSchema
+  .virtual('date_of_birth_iso')
+  .get(function() {
+    return DateTime.fromJSDate(this.date_of_birth).toISODate();
+  });
+AuthorSchema
+  .virtual('date_of_death_iso')
+  .get(function() {
+    return DateTime.fromJSDate(this.date_of_death).toISODate();
   });
 
 // Export Model
