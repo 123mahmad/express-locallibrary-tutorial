@@ -4,7 +4,7 @@ let Genre = require('../models/genre');
 let BookInstance = require('../models/bookinstance');
 let async = require('async');
 let { body, validationResult } = require('express-validator');
-
+//------------------------------------------------------------------------------
 
 // index page for '/' or '/catalog'
 exports.index = (req, res, next) => {
@@ -28,6 +28,7 @@ exports.index = (req, res, next) => {
     res.render('index', {title: 'Local Library Home', error: err, data: results});
   });
 };
+//------------------------------------------------------------------------------
 
 // Display list of all books.
 exports.book_list = (req, res, next) => {
@@ -39,6 +40,7 @@ exports.book_list = (req, res, next) => {
       res.render('book_list', {title: 'Book List', book_list: list_books});
     });
 };
+//------------------------------------------------------------------------------
 
 // Display detail page for a specific book.
 exports.book_detail = (req, res, next) => {
@@ -68,6 +70,7 @@ exports.book_detail = (req, res, next) => {
     });
   });
 };
+//------------------------------------------------------------------------------
 
 // Display book create form on GET.
 exports.book_create_get = (req, res, next) => {
@@ -87,6 +90,7 @@ exports.book_create_get = (req, res, next) => {
     });
   });
 };
+//------------------------------------------------------------------------------
 
 // Handle book create on POST.
 exports.book_create_post = [
@@ -174,16 +178,61 @@ exports.book_create_post = [
     });
   },
 ];
-
+//------------------------------------------------------------------------------
 
 // Display book delete form on GET.
-exports.book_delete_get = (req, res) => {
-  res.send('NOT IMPLEMENTED: Book delete GET');
+exports.book_delete_get = (req, res, next) => {
+  async.parallel({
+      book(callback) {
+        Book.findById(req.params.id)
+        .populate('author genre')
+        .exec(callback);
+      },
+      book_instances(callback) {
+        BookInstance.find({book: req.params.id}).exec(callback);
+      },
+  }, (err, results) => {
+    if (err) return next(err);
+    if (results.book == null) {
+      res.redirect('catalog/books');
+    }
+    res.render("book_delete", {
+      title: "Delete Book",
+      book: results.book,
+      book_instances: results.book_instances,
+    });
+  });
 };
+//------------------------------------------------------------------------------
 
 // Handle book delete on POST.
-exports.book_delete_post = (req, res) => {
-  res.send('NOT IMPLEMENTED: Book delete POST');
+exports.book_delete_post = (req, res, next) => {
+  async.parallel({
+    book(callback) {
+      Book.findById(req.params.id)
+      .populate('author genre')
+      .exec(callback);
+    },
+    book_instances(callback) {
+      BookInstance.find({book: req.params.id}).exec(callback);
+    },
+}, (err, results) => {
+  if (err) return next(err);
+  if (results.book_instances.length > 0) {
+    res.render("book_delete", {
+      title: "Delete Book",
+      book: results.book,
+      book_instances: results.book_instances,
+    })
+  }
+  Book.findByIdAndRemove(req.body.bookid, (err) => {
+    if (err) {
+      return next(err);
+    }
+    // Success - go to author list
+    res.redirect("/catalog/books");
+  });
+});
 };
 //---------------------------------------------------------------------------
 
