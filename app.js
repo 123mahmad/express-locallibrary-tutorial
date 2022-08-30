@@ -3,6 +3,8 @@ let express = require('express');
 let path = require('path');
 let cookieParser = require('cookie-parser');
 let logger = require('morgan');
+let compression = require('compression');
+let helmet = require('helmet');
 
 let indexRouter = require('./routes/index');
 let usersRouter = require('./routes/users');
@@ -21,10 +23,15 @@ db.on('error', console.error.bind(console, 'mongoDB connection error:'));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
+//------------------------------------------------
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+app.use(helmet());
+app.use(compression());
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
